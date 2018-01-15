@@ -1,0 +1,26 @@
+{
+  "name": "stackflow",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "dev": "DEBUG_COLORS=false DEBUG=stackflow:* NODE_ENV=development nodemon ./bin/www",
+    "devx": "DEBUG_COLORS=false DEBUG=stackflow:* NODE_ENV=development pm2 start --watch . --name=dev3000 ./bin/www",
+    "postdevx": "pm2 logs",
+    "watch": "onchange '**/*.js' -- yarn run dev"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "~1.18.2",
+    "boom": "~7.1.1",
+    "cookie-parser": "~1.4.3",
+    "cors": "~2.8.4",
+    "debug": "~2.6.9",
+    "dotenv": "^4.0.0",
+    "express": "~4.15.5",
+    "faker": "^4.1.0",
+    "jsonwebtoken": "^8.1.0",
+    "mongoose": "^4.13.9",
+    "morgan": "~1.9.0"
+  }
+}
