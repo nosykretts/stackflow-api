@@ -14,15 +14,23 @@ let questionSchema = new Schema(
       type: String,
       required : true
     },
-    votes : [{
+    upvoters : [{
       type : Schema.Types.ObjectId,
     }],
-    answers : [answerModel.schema]
+    downvoters : [{
+      type : Schema.Types.ObjectId,
+    }],
   },
   { 
     usePushEach: true,
     timestamps: {} // auto generate createdAt and updatedAt field
   } 
 )
+
+questionSchema.virtual('answers', {
+  ref: 'Answer',
+  localField: '_id',
+  foreignField: 'question'
+})
 
 module.exports = mongoose.model('Question', questionSchema)

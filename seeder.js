@@ -30,6 +30,12 @@ let exactUser = [
     email: 'agum@gmail.com',
     password: '1234',
   }),
+  UserModel.create({
+    name: 'Andreyanti',
+    username: 'andreyy',
+    email: 'andre@gmail.com',
+    password: '1234',
+  }),
 ]
 
 function rb(min, max) {

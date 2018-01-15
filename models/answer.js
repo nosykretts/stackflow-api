@@ -4,6 +4,11 @@ const Schema = mongoose.Schema
 
 let answerSchema = new Schema(
   {
+    question: {
+      type : Schema.Types.ObjectId,
+      ref: 'Question',
+      required : true
+    },
     creator : {
       type : Schema.Types.ObjectId,
       ref : 'User',
@@ -13,8 +18,11 @@ let answerSchema = new Schema(
       type: String,
       required : true
     },
-    votes : [{
-      type : Schema.Types.ObjectId,
+    upvoters: [{
+      type: Schema.Types.ObjectId,
+    }],
+    downvoters: [{
+      type: Schema.Types.ObjectId,
     }],
   },
   { timestamps: {} } // auto generate createdAt and updatedAt field
