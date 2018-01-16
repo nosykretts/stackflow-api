@@ -23,6 +23,7 @@ let questionSchema = new Schema(
   },
   { 
     usePushEach: true,
+    toJSON: { virtuals: true },
     timestamps: {} // auto generate createdAt and updatedAt field
   } 
 )
@@ -32,5 +33,21 @@ questionSchema.virtual('answers', {
   localField: '_id',
   foreignField: 'question'
 })
+
+function autoPol(next){
+  this
+  .populate({
+    path: 'creator',
+    select: ['username', 'name'],
+  })
+  .populate({
+    path: 'answers',
+    populate: { path: 'creator', select: ['name'] },
+  })
+  next()
+}
+
+questionSchema.pre('findOne', autoPol)
+questionSchema.pre('find', autoPol)
 
 module.exports = mongoose.model('Question', questionSchema)

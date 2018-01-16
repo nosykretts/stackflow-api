@@ -18,18 +18,6 @@ module.exports = {
   getQuestions: function(req, res, next) {
     QuestionModel.find()
       .sort({ createdAt: 'desc' })
-      // .populate({
-      //   path: 'creator',
-      //   select: ['username', 'name'],
-      // })
-      // .populate({
-      //   path: 'answers.creator',
-      //   select: ['username', 'name'],
-      // })
-      // .populate({
-      //   path: 'answers',
-      //   populate: { path: 'creator', select: ['name'] }
-      // })
       .lean()
       .then(questions => {
         return questions.map(question =>
@@ -44,6 +32,23 @@ module.exports = {
       )
       .catch(err => next(boom.boomify(err)))
   },
+  getQuestion: function(req, res, next) {
+    QuestionModel.findOne({
+      _id: req.params.id,
+    })
+      .then(question => {
+        if (!question) {
+          return res.status(404).json({
+            message: 'Question not found',
+          })
+        }
+        res.status(200).json({
+          message: 'Question get success',
+          data: question,
+        })
+      })
+      .catch(err => next(boom.boomify(err)))
+  },
   createQuestion: (req, res, next) => {
     QuestionModel.create({
       creator: req.userId,
@@ -51,80 +56,12 @@ module.exports = {
       caption: req.body.caption,
     })
       .then(question => {
-        return question
-          .populate({
-            path: 'creator',
-            select: ['username', 'name'],
-          })
-          .execPopulate()
-      })
-      .then(question => {
         res.status(200).json({
           message: 'Question successfully created',
           data: question,
         })
       })
       .catch(err => next(boom.boomify(err)))
-  },
-  createAnswer: function(req, res, next) {
-    AnswerModel.create({
-      question: req.params.id,
-      creator: req.userId,
-      caption: req.body.caption,
-    })
-      .then(answer => {
-        res.status(200).json({
-          message: 'Answers successfully created',
-          data: answer,
-        })
-      })
-      .catch(err => next(boom.boomify(err)))
-  },
-  deleteAnswer: function(req, res, next) {
-    AnswerModel.findOneAndRemove({
-      question: req.params.id,
-      _id: req.params.answerId,
-    })
-      .then(answer => {
-        if (!answer) {
-          return res.status(404).json({
-            message: 'Answer not found',
-          })
-        }
-        res.status(200).json({
-          message: 'Answer successfully deleted',
-          data: answer,
-        })
-      })
-      .catch(err => next(boom.boomify(err)))
-  },
-  toggleAnswerVote: function(req, res, next) {
-
-  },
-  toggleQuestionVote: function(req, res, next) {
-    QuestionModel.findOne({
-      _id: req.params.id,
-    })
-      .then(question => {
-        if (!question || question.creator == req.userId) {
-          return res.status(404).json({
-            message: 'Question not found or you cant vote your own question',
-          })
-        }
-        if (question.votes.indexOf(req.userId) >= 0) {
-          question.votes.pull(req.userId)
-        } else {
-          question.votes.push(req.userId)
-        }
-        return question.save()
-      })
-      .then(question => {
-        res.status(200).json({
-          message: 'Question upvote or downvote success',
-          data: question.votes,
-        })
-      })
-      .catch(err => next(boom.boomify()))
   },
   updateCaption: function(req, res, next) {
     QuestionModel.findOneAndUpdate(
@@ -147,6 +84,43 @@ module.exports = {
         data: question,
       })
     })
+  },
+  toggleQuestionVote: function(req, res, next) {
+    QuestionModel.findOne({
+      _id: req.params.id,
+    })
+      .then(question => {
+        if (!question || question.creator._id == req.userId) {
+          // return res.status(404).json({
+          //   message: 'Question not found or you cant vote your own questionx',
+          // })
+          throw new Error('Question not found or you cant vote your own question')
+    
+        } else {
+          const isUpvote = req.body.direction === 'up'
+          const isCurrentUpvoter = question.upvoters.indexOf(req.userId) >= 0
+          const isCurrentDownvoter =
+            question.downvoters.indexOf(req.userId) >= 0
+
+          if (isUpvote && !isCurrentUpvoter) {
+            question.downvoters.pull(req.userId)
+            question.upvoters.push(req.userId)
+          }
+          if (!isUpvote && !isCurrentDownvoter) {
+            question.downvoters.push(req.userId)
+            question.upvoters.pull(req.userId)
+          }
+          return question.save()
+        }
+      })
+      .then(question => {
+        console.log('masuk trues ke then')
+        res.status(200).send({
+          message: 'Question upvote or downvote success',
+          data: question,
+        })
+      })
+      .catch(err => next(boom.boomify(err)))
   },
   deleteQuestion: function(req, res, next) {
     QuestionModel.findOneAndRemove({

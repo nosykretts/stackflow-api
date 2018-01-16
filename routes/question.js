@@ -5,18 +5,24 @@ const {
   deleteQuestion,
   updateCaption,
   getQuestions,
-  createAnswer,
-  deleteAnswer,
+  getQuestion,
   toggleQuestionVote,
-  toggleAnswerVote
+  
 } = require('../controllers/question')
 
+const {
+  toggleAnswerVote,
+  createAnswer,
+  deleteAnswer,
+} = require('../controllers/answer')
+
 router.get('/', authentication, getQuestions)
+router.get('/:id', authentication, getQuestion)
 router.post('/', authentication, createQuestion)
-router.put('/:id/togglequestionvote',authentication, toggleQuestionVote)
-router.put('/:id/toggleanswervote',authentication, toggleAnswerVote)
+router.put('/:id/togglevote',authentication, toggleQuestionVote)
 router.put('/:id/updatecaption', authentication, updateCaption)
 router.post('/:id/answers', authentication, createAnswer)
+router.put('/:id/answers/:answerId/togglevote',authentication, toggleAnswerVote)
 router.delete('/:id/answers/:answerId', authentication, deleteAnswer)
 router.delete('/:id', authentication, deleteQuestion)
 

@@ -25,9 +25,20 @@ let answerSchema = new Schema(
       type: Schema.Types.ObjectId,
     }],
   },
-  { timestamps: {} } // auto generate createdAt and updatedAt field
+  {
+    usePushEach: true,
+    toJSON: { virtuals: true }, 
+    timestamps: {} 
+  } // auto generate createdAt and updatedAt field
 )
 
+function autoPol(next){
+  this.populate('creator')
+  next()
+}
+
+answerSchema.pre('findOne', autoPol)
+answerSchema.pre('find', autoPol)
 
 module.exports = mongoose.model('Answer', answerSchema)
 
