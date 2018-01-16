@@ -49,7 +49,7 @@ module.exports = {
           // return res.status(404).json({
           //   message: 'answer not found or you cant vote your own answer',
           // })
-          throw new Error('Answer not found or you cant vote your own question')
+          throw new Error('Answer not found or you cant vote your own answer')
         }
         const isUpvote = req.body.direction === 'up'
         const isCurrentUpvoter = answer.upvoters.indexOf(req.userId) >= 0
