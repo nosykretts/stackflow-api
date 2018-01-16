@@ -14,6 +14,10 @@ let questionSchema = new Schema(
       type: String,
       required : true
     },
+    description: {
+      type: String,
+      required : true
+    },
     upvoters : [{
       type : Schema.Types.ObjectId,
     }],

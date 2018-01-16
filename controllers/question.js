@@ -54,6 +54,7 @@ module.exports = {
       creator: req.userId,
       photoUrl: req.photoUrl,
       caption: req.body.caption,
+      description: req.body.description
     })
       .then(question => {
         res.status(200).json({
@@ -63,7 +64,7 @@ module.exports = {
       })
       .catch(err => next(boom.boomify(err)))
   },
-  updateCaption: function(req, res, next) {
+  updateQuestion: function(req, res, next) {
     QuestionModel.findOneAndUpdate(
       {
         _id: req.params.id,
@@ -71,6 +72,7 @@ module.exports = {
       },
       {
         caption: req.body.caption,
+        description: req.body.description,
       },
       { new: true }
     ).then(question => {

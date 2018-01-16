@@ -3,7 +3,7 @@ const authentication = require('../middlewares/authentication')
 const {
   createQuestion,
   deleteQuestion,
-  updateCaption,
+  updateQuestion,
   getQuestions,
   getQuestion,
   toggleQuestionVote,
@@ -19,8 +19,8 @@ const {
 router.get('/', authentication, getQuestions)
 router.get('/:id', authentication, getQuestion)
 router.post('/', authentication, createQuestion)
+router.put('/:id', authentication, updateQuestion)
 router.put('/:id/togglevote',authentication, toggleQuestionVote)
-router.put('/:id/updatecaption', authentication, updateCaption)
 router.post('/:id/answers', authentication, createAnswer)
 router.put('/:id/answers/:answerId/togglevote',authentication, toggleAnswerVote)
 router.delete('/:id/answers/:answerId', authentication, deleteAnswer)
