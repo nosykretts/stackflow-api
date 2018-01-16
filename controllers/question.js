@@ -13,11 +13,7 @@ function manipulateQuestion(question, loggedInId) {
     // votedByMe: questioniffy.votes.indexOf(loggedInId) >= 0,
   }
 }
-const creatorOptPopulate = {
-  path: 'creator',
-  select: ['username', 'name'],
-  // options: { lean: true}
-}
+
 module.exports = {
   getQuestions: function(req, res, next) {
     QuestionModel.find()
