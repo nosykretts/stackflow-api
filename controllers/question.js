@@ -19,20 +19,26 @@ function manipulateQuestion(question, loggedInId = false) {
       loggedInId &&
       !(questioniffy.creator._id == loggedInId) &&
       questioniffy.downvoters.indexOf(loggedInId) == -1,
-    canAddAnswer : loggedInId && !questioniffy.answers.some(answer => {
-      return answer.creator._id == loggedInId
-    }),
-    answers : questioniffy.answers.map(answer => {
+    canAddAnswer:
+      loggedInId &&
+      !questioniffy.answers.some(answer => {
+        return answer.creator._id == loggedInId
+      }),
+    answers: questioniffy.answers.map(answer => {
       return {
         ...answer,
         canDelete: answer.creator._id == loggedInId,
-        canVoteUp: !(answer.creator._id == loggedInId) && answer.upvoters.indexOf(loggedInId) == -1,
-        canVoteDown: !(answer.creator._id == loggedInId) && answer.downvoters.indexOf(loggedInId) == -1,
+        canVoteUp:
+          !(answer.creator._id == loggedInId) &&
+          answer.upvoters.indexOf(loggedInId) == -1,
+        canVoteDown:
+          !(answer.creator._id == loggedInId) &&
+          answer.downvoters.indexOf(loggedInId) == -1,
       }
-    })
+    }),
     // votedByMe: questioniffy.votes.indexOf(loggedInId) >= 0,
   }
-  console.log('---->',questioniffy,'<-----')
+  console.log('---->', questioniffy, '<-----')
 
   console.log(x)
   return x
@@ -43,11 +49,11 @@ module.exports = {
     QuestionModel.find()
       .sort({ createdAt: 'desc' })
       .lean()
-      // .then(questions => {
-      //   return questions.map(question =>
-      //     manipulateQuestion(question, req.userId)
-      //   )
-      // })
+      .then(questions => {
+        return questions.map(question =>
+          manipulateQuestion(question, req.userId)
+        )
+      })
       .then(questions =>
         res.status(200).json({
           message: 'Questions get success',
@@ -133,7 +139,7 @@ module.exports = {
             'Question not found or you cant vote your own question'
           )
         } else {
-          const isUpvote = req.body.direction === 'up'
+          const isUpvote = req.body.direction == 'up'
           const isCurrentUpvoter = question.upvoters.indexOf(req.userId) >= 0
           const isCurrentDownvoter =
             question.downvoters.indexOf(req.userId) >= 0
@@ -150,7 +156,6 @@ module.exports = {
         }
       })
       .then(question => {
-        console.log('masuk trues ke then')
         res.status(200).send({
           message: 'Question upvote or downvote success',
           data: question,
