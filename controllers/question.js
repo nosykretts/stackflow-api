@@ -3,15 +3,39 @@ const boom = require('boom')
 const QuestionModel = require('../models/question')
 const AnswerModel = require('../models/answer')
 
-function manipulateQuestion(question, loggedInId) {
+function manipulateQuestion(question, loggedInId = false) {
+  console.log('----> boom', loggedInId)
   let questioniffy = JSON.parse(JSON.stringify(question))
-  return {
-    ...question,
-    canEditQuestion: question.creator._id == loggedInId,
-    canDeleteQuestion: question.creator._id == loggedInId,
-    canVoteQuestion: question.creator._id != loggedInId,
+  questioniffy.answers = questioniffy.answers || []
+  const x = {
+    ...questioniffy,
+    canUpdate: loggedInId && questioniffy.creator._id == loggedInId,
+    canDelete: loggedInId && questioniffy.creator._id == loggedInId,
+    canVoteUp:
+      loggedInId &&
+      !(questioniffy.creator._id == loggedInId) &&
+      questioniffy.upvoters.indexOf(loggedInId) == -1,
+    canVoteDown:
+      loggedInId &&
+      !(questioniffy.creator._id == loggedInId) &&
+      questioniffy.downvoters.indexOf(loggedInId) == -1,
+    canAddAnswer : loggedInId && !questioniffy.answers.some(answer => {
+      return answer.creator._id == loggedInId
+    }),
+    answers : questioniffy.answers.map(answer => {
+      return {
+        ...answer,
+        canDelete: answer.creator._id == loggedInId,
+        canVoteUp: !(answer.creator._id == loggedInId) && answer.upvoters.indexOf(loggedInId) == -1,
+        canVoteDown: !(answer.creator._id == loggedInId) && answer.downvoters.indexOf(loggedInId) == -1,
+      }
+    })
     // votedByMe: questioniffy.votes.indexOf(loggedInId) >= 0,
   }
+  console.log('---->',questioniffy,'<-----')
+
+  console.log(x)
+  return x
 }
 
 module.exports = {
@@ -19,11 +43,11 @@ module.exports = {
     QuestionModel.find()
       .sort({ createdAt: 'desc' })
       .lean()
-      .then(questions => {
-        return questions.map(question =>
-          manipulateQuestion(question, req.userId)
-        )
-      })
+      // .then(questions => {
+      //   return questions.map(question =>
+      //     manipulateQuestion(question, req.userId)
+      //   )
+      // })
       .then(questions =>
         res.status(200).json({
           message: 'Questions get success',
@@ -36,6 +60,7 @@ module.exports = {
     QuestionModel.findOne({
       _id: req.params.id,
     })
+      .lean()
       .then(question => {
         if (!question) {
           return res.status(404).json({
@@ -44,7 +69,7 @@ module.exports = {
         }
         res.status(200).json({
           message: 'Question get success',
-          data: question,
+          data: manipulateQuestion(question, req.userId),
         })
       })
       .catch(err => next(boom.boomify(err)))
@@ -54,12 +79,20 @@ module.exports = {
       creator: req.userId,
       photoUrl: req.photoUrl,
       caption: req.body.caption,
-      description: req.body.description
+      description: req.body.description,
     })
+      .then(question =>
+        question
+          .populate({
+            path: 'creator',
+            select: ['username', 'name'],
+          })
+          .execPopulate()
+      )
       .then(question => {
         res.status(200).json({
           message: 'Question successfully created',
-          data: question,
+          data: manipulateQuestion(question.toJSON(), req.userId),
         })
       })
       .catch(err => next(boom.boomify(err)))
@@ -96,8 +129,9 @@ module.exports = {
           // return res.status(404).json({
           //   message: 'Question not found or you cant vote your own questionx',
           // })
-          throw new Error('Question not found or you cant vote your own question')
-    
+          throw new Error(
+            'Question not found or you cant vote your own question'
+          )
         } else {
           const isUpvote = req.body.direction === 'up'
           const isCurrentUpvoter = question.upvoters.indexOf(req.userId) >= 0

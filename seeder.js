@@ -3,6 +3,7 @@ const mongoose = require('mongoose')
 const faker = require('faker/locale/id_ID')
 
 let UserModel = require('./models/user')
+let QuestionModel = require('./models/question')
 
 let  counter = 0;
 mongoose.connection.openUri(process.env.MONGODB_CONN_STRING, {
@@ -25,13 +26,13 @@ let exactUser = [
     password: '1234',
   }),
   UserModel.create({
-    name: 'Agum',
+    name: 'Agum Andi',
     username: 'agumandi',
     email: 'agum@gmail.com',
     password: '1234',
   }),
   UserModel.create({
-    name: 'Andreyanti',
+    name: 'Andre Yanti',
     username: 'andreyy',
     email: 'andre@gmail.com',
     password: '1234',
@@ -71,6 +72,22 @@ function randPhotos(user) {
   })
 }
 
+function createQuestions(users) {
+  let questions = []
+  for (const user of users) {
+    for (let i =0; i < 4; i++) {
+      let pro = QuestionModel.create({
+        caption: faker.lorem.sentence().split('.').join(''),
+        description: faker.lorem.paragraph(),
+        creator: user._id,
+      })  
+      questions.push(pro)
+    }
+  }
+  return Promise.all(questions)
+}
+
+
 let xusers = null
 
 createUsers()
@@ -78,6 +95,11 @@ createUsers()
     xusers = _users
     console.log(xusers[0])
     console.log(xusers[1])
+    return createQuestions(_users)
+  })
+  .then(questions => {
+    console.log(questions[0])
+    console.log(questions[1])
     process.exit()
   })
   .catch(err => {

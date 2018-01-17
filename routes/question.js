@@ -16,8 +16,13 @@ const {
   deleteAnswer,
 } = require('../controllers/answer')
 
-router.get('/', authentication, getQuestions)
-router.get('/:id', authentication, getQuestion)
+const publicAccess = function(req,res,next){
+  req.publicAccess = true
+  next()
+}
+
+router.get('/' , publicAccess, authentication, getQuestions)
+router.get('/:id', publicAccess, authentication, getQuestion)
 router.post('/', authentication, createQuestion)
 router.put('/:id', authentication, updateQuestion)
 router.put('/:id/togglevote',authentication, toggleQuestionVote)

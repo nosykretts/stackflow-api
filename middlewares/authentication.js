@@ -5,6 +5,11 @@ module.exports = function(req, res, next) {
   const bearerToken = req.headers.authorization
   const token =
     bearerToken && bearerToken.split(' ')[1] ? bearerToken.split(' ')[1] : undefined
+  if(req.publicAccess && !token){
+    req.decoded = false
+    req.userId =false
+    return next()
+  }  
   if(!token){
     return next(boom.forbidden('Token required'))
   }
